@@ -1,86 +1,74 @@
-// EventForm.js
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 
-const EventForm = ({ event, onSave }) => {
-  const [formData, setFormData] = useState({
-    title: '',
-    date: '',
-    time: '',
-    description: '',
-    attachments: []
+const EventForm = () => {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  const [eventData, setEventData] = useState({
+    title: "",
+    date: "",
+    pictureUrl: "",
+    videoUrl: "",
   });
-
-  // Pre-fill the form if editing an event
-  useEffect(() => {
-    if (event) {
-      setFormData({
-        title: event.title,
-        date: event.date,
-        time: event.time,
-        description: event.description,
-        attachments: event.attachments
-      });
-    }
-  }, [event]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setEventData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault(); // Move this to the start of the function
-    
-    if (event) {
-      // Update event
-      await axios.put(`http://localhost:3000/events/${event.id}`, formData);
-    } else {
-      // Create event
-      await axios.post('http://localhost:3000/events', formData); // Use formData here
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!eventData.title || !eventData.date) {
+      alert("Please fill in the required fields!");
+      return;
     }
-    onSave(); // Call onSave to refresh the event list
+    // Submit form logic
+    console.log(eventData);
   };
-  
 
   return (
     <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        name="title"
-        value={formData.title}
-        onChange={handleChange}
-        placeholder="Event Title"
-      />
-      <input
-        type="date"
-        name="date"
-        value={formData.date}
-        onChange={handleChange}
-      />
-      <input
-        type="time"
-        name="time"
-        value={formData.time}
-        onChange={handleChange}
-      />
-      <textarea
-        name="description"
-        value={formData.description}
-        onChange={handleChange}
-        placeholder="Event Description"
-      />
-      <input
-        type="text"
-        name="attachments"
-        value={formData.attachments}
-        onChange={handleChange}
-        placeholder="Attachments (comma separated)"
-      />
-      <button type="submit">{event ? 'Update Event' : 'Create Event'}</button>
+      <label>
+        Event Title:
+        <input
+          type="text"
+          name="title"
+          value={eventData.title}
+          onChange={handleChange}
+          required
+        />
+      </label>
+      <label>
+        Event Date:
+        <input
+          type="date"
+          name="date"
+          value={eventData.date}
+          onChange={handleChange}
+          required
+        />
+      </label>
+      <label>
+        Picture URL:
+        <input
+          type="url"
+          name="pictureUrl"
+          value={eventData.pictureUrl}
+          onChange={handleChange}
+        />
+      </label>
+      <label>
+        Video URL:
+        <input
+          type="url"
+          name="videoUrl"
+          value={eventData.videoUrl}
+          onChange={handleChange}
+        />
+      </label>
+      <button type="submit">Create Event</button>
     </form>
   );
 };
